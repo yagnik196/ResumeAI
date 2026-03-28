@@ -31,7 +31,7 @@ An intelligent, AWS-powered, serverless web application that analyzes PDF resume
 - npm or yarn
 - Configure your AWS Backend and obtain your API Gateway/Function URL
 
-### Installation
+<!-- ### Installation
 
 1. Clone the repository
    ```bash
@@ -64,4 +64,4 @@ The frontend interfaces with three primary backend endpoints:
 3. `GET /analysis/{resume_id}`: Frontend systematically polls this endpoint to fetch the JSON report containing ATS scores, missing/found skills, and actionable recommendations directly from DynamoDB.
 
 ## 🤝 Contribution Guidelines
-This project is open for exploration and improvements. Feel free to fork, optimize the UI, or expand the AI features by submitting a pull request!
+This project is open for exploration and improvements. Feel free to fork, optimize the UI, or expand the AI features by submitting a pull request! -->
