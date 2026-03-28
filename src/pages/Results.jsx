@@ -21,14 +21,6 @@ export default function Results({ result, onReset }) {
     return 'danger';
   };
 
-  const extractString = (item) => {
-    if (!item) return '';
-    if (typeof item === 'string') return item;
-    if (typeof item === 'object') {
-      return item.S || item.s || Object.values(item)[0] || JSON.stringify(item);
-    }
-    return String(item);
-  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-[fadeIn_0.5s_ease-out]">
@@ -49,15 +41,15 @@ export default function Results({ result, onReset }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ResultCard
           title="Role Match"
-          value={Math.round(Number(skill_match) || 0)}
+          value={skill_match}
           suffix="%"
-          type={getMatchType(Math.round(Number(skill_match) || 0))}
+          type={getMatchType(skill_match)}
         />
         <ResultCard
           title="ATS Score"
-          value={Math.round(Number(ats_score) || 0)}
+          value={ats_score}
           suffix="/ 100"
-          type={getMatchType(Math.round(Number(ats_score) || 0))}
+          type={getMatchType(ats_score)}
         />
       </div>
 
@@ -97,7 +89,7 @@ export default function Results({ result, onReset }) {
             {skills_found.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {skills_found.map((skill, idx) => (
-                  <SkillBadge key={idx} skill={extractString(skill)} type="found" />
+                  <SkillBadge key={idx} skill={skill} type="found" />
                 ))}
               </div>
             ) : (
@@ -113,7 +105,7 @@ export default function Results({ result, onReset }) {
             {missing_skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {missing_skills.map((skill, idx) => (
-                  <SkillBadge key={idx} skill={extractString(skill)} type="missing" />
+                  <SkillBadge key={idx} skill={skill} type="missing" />
                 ))}
               </div>
             ) : (
@@ -135,7 +127,7 @@ export default function Results({ result, onReset }) {
                 <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-bold">
                   {idx + 1}
                 </span>
-                <p className="text-gray-700 pt-0.5">{extractString(suggestion)}</p>
+                <p className="text-gray-700 pt-0.5">{suggestion}</p>
               </li>
             ))}
           </ul>

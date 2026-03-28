@@ -53,9 +53,12 @@ export default function Home({ onAnalyzeSuccess }) {
           const result = await getAnalysisResult(resume_id);
           
           // Step 5: Stop polling when valid result received
-          if (result && (!result.status || result.status === 'COMPLETED' || result.status !== 'PROCESSING')) {
-            analysisResult = result;
-            break;
+          // Explicitly wait for 'completed' (lowercase) status, ensuring 'processing' payloads loop natively
+          if (result && !result.error && result.resume_id) {
+            if (result.status === 'completed' || (!result.status && result.skill_match !== undefined)) {
+              analysisResult = result;
+              break;
+            }
           }
         } catch (pollErr) {
           // If 404, it might simply not be ready yet. Continue polling.
