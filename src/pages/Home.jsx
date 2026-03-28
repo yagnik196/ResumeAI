@@ -7,7 +7,10 @@ import { resume } from 'react-dom/server';
 
 const ROLES = [
   { id: 'software_engineer', label: 'Software Engineer' },
-  { id: 'data_scientist', label: 'Data Scientist' }
+  { id: 'data_scientist', label: 'Data Scientist' },
+  { id: 'devops_engineer', label: 'Devops Engineer' },
+  { id: 'frontend_developer', label: 'Frontend Developer' }
+
 ];
 
 export default function Home({ onAnalyzeSuccess }) {
