@@ -72,7 +72,7 @@ graph TD
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Structure (Frontend)
 
 ```text
 ├── src/
@@ -109,8 +109,9 @@ This isn't just another CRUD app. It combines **Cloud Engineering**, **AI-driven
 
 ## 👨‍💻 Author
 
-**Yagnik Baldaniya**
-**Harsh Beladiya**  
+-**Yagnik Baldaniya**
+
+-**Harsh Beladiya**  
 
 ---
 
