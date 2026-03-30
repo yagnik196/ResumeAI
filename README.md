@@ -109,9 +109,8 @@ This isn't just another CRUD app. It combines **Cloud Engineering**, **AI-driven
 
 ## 👨‍💻 Author
 
-**Yagnik**  
-*Full Stack & Cloud Developer*  
-[GitHub Profile](https://github.com/yagnik196) | [LinkedIn](https://linkedin.com/in/yourprofile)
+**Yagnik Baldaniya**
+**Harsh Beladiya**  
 
 ---
 
