@@ -3,21 +3,25 @@ import { ChevronRight, AlertCircle } from 'lucide-react';
 import UploadBox from '../components/UploadBox';
 import Loader from '../components/Loader';
 import { getUploadUrl, uploadToS3, getAnalysisResult } from '../services/api';
-import { resume } from 'react-dom/server';
 
 const ROLES = [
   { id: 'software_engineer', label: 'Software Engineer' },
   { id: 'data_scientist', label: 'Data Scientist' },
   { id: 'devops_engineer', label: 'Devops Engineer' },
   { id: 'frontend_developer', label: 'Frontend Developer' }
-
 ];
 
 export default function Home({ onAnalyzeSuccess }) {
   const [file, setFile] = useState(null);
   const [role, setRole] = useState(ROLES[0].id);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('Preparing upload...');
   const [error, setError] = useState(null);
+
+  /**
+   * Helper to sleep between polls
+   */
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleAnalyze = async () => {
     if (!file) {
@@ -27,63 +31,79 @@ export default function Home({ onAnalyzeSuccess }) {
 
     setLoading(true);
     setError(null);
+    setLoadingMessage('Initializing analysis...');
 
     try {
-      // Step 1: Call POST /upload to get presigned URL
-      console.log('Step 1: Requesting upload URL...');
-      const { resume_id, upload_url } = await getUploadUrl(file.name, file.type);
-      console.log('Got upload URL:', upload_url);
-
-      // Step 2: Upload file directly to S3
-      console.log('Step 2: Uploading file to S3...');
-      await uploadToS3(upload_url.url, upload_url.fields, file);
-      console.log('S3 upload successful.');
-
-      // Step 3 & 4: Wait and poll GET /analysis/{resume_id}
-      console.log('Step 3: Polling for analysis results...');
-      let analysisResult = null;
-      let attempts = 0;
-      const MAX_ATTEMPTS = 20; // 20 attempts * 3 sec = 60 seconds timeout
+      // Step 1: Get presigned URL
+      setLoadingMessage('Requesting secure upload URL...');
+      const uploadData = await getUploadUrl(file.name, file.type);
       
-      while (!analysisResult && attempts < MAX_ATTEMPTS) {
-        // Wait 3 seconds before next poll
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        
+      if (!uploadData || !uploadData.resume_id || !uploadData.upload_url) {
+        throw new Error('Failed to get upload credentials from server.');
+      }
+      
+      const { resume_id, upload_url } = uploadData;
+
+      // Step 2: Upload to S3
+      setLoadingMessage('Uploading resume to secure storage...');
+      await uploadToS3(upload_url.url, upload_url.fields, file);
+
+      // Step 3: Polling for results
+      setLoadingMessage('AI is analyzing your resume...');
+      
+      const MAX_RETRIES = 20; // 20 retries * 3s = 60s total timeout
+      const RETRY_INTERVAL = 3000; // 3 seconds
+      let analysisResult = null;
+
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        // Update message occasionally to show we're still working
+        if (attempt === 5) setLoadingMessage('Extracting skills and keywords...');
+        if (attempt === 10) setLoadingMessage('Calculating ATS compatibility score...');
+        if (attempt === 15) setLoadingMessage('Finalizing results...');
+
+        // Wait before each poll (including the first one to give Lambda time to trigger)
+        await sleep(RETRY_INTERVAL);
+
         try {
           const result = await getAnalysisResult(resume_id);
-          
-          // Step 5: Stop polling when valid result received
-          // Explicitly wait for 'completed' (lowercase) status, ensuring 'processing' payloads loop natively
-          if (result && !result.error && result.resume_id) {
-            if (result.status === 'completed' || (!result.status && result.skill_match !== undefined)) {
-              analysisResult = result;
-              break;
-            }
+
+          // Check if analysis is complete
+          if (result && result.status === 'completed') {
+            analysisResult = result;
+            break;
           }
+
+          // If backend returns an explicit error in the body
+          if (result && result.error) {
+            throw new Error(result.error);
+          }
+
+          // Otherwise, it's still 'processing' or 404 (handled as 'processing' in api.js)
+          console.log(`Poll attempt ${attempt}: Still processing...`);
         } catch (pollErr) {
-          // If 404, it might simply not be ready yet. Continue polling.
-          if (pollErr.response?.status !== 404) {
-             throw pollErr; // Actual error occurred
-          }
+          // If it's a real network error (not a 404 handled by api.js), we stop
+          console.error('Polling error:', pollErr);
+          throw new Error('Lost connection to analysis server. Please try again.');
         }
-        attempts++;
       }
 
       if (!analysisResult) {
-        throw new Error('Analysis timed out. Please try again later.');
+        throw new Error('Analysis is taking longer than expected. Please try refreshing in a moment.');
       }
 
-      onAnalyzeSuccess(analysisResult);
+      // Success! Pass data to parent with the selected role name
+      const selectedRole = ROLES.find(r => r.id === role)?.label || role;
+      onAnalyzeSuccess({ ...analysisResult, selectedRole });
     } catch (err) {
-      console.error(err);
-      setError(err.message || err.response?.data?.message || 'Something went wrong during analysis. Please try again or check the API connection.');
+      console.error('Analysis failed:', err);
+      setError(err.message || 'Something went wrong during analysis. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <Loader />;
+    return <Loader message={loadingMessage} />;
   }
 
   return (

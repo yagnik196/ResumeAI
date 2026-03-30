@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Mail, Lightbulb } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lightbulb, Briefcase } from 'lucide-react';
 import ResultCard from '../components/ResultCard';
 import SkillBadge from '../components/SkillBadge';
 
@@ -12,7 +12,8 @@ export default function Results({ result, onReset }) {
     missing_skills = [],
     skill_match = 0,
     ats_score = 0,
-    suggestions = []
+    suggestions = [],
+    selectedRole = 'General Role'
   } = result;
 
   const getMatchType = (score) => {
@@ -21,13 +22,12 @@ export default function Results({ result, onReset }) {
     return 'danger';
   };
 
-
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="space-y-1">
           <h2 className="text-3xl font-bold text-gray-900">Analysis Results</h2>
-          <p className="text-gray-500 mt-1">Here is how your resume performed.</p>
+          <p className="text-gray-500 font-medium">Detailed report on your resume's performance</p>
         </div>
         <button
           onClick={onReset}
@@ -54,25 +54,14 @@ export default function Results({ result, onReset }) {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-4">Personal Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-              <User className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 font-medium">Name</p>
-              <p className="font-semibold text-gray-900">{name || 'Not detected'}</p>
-            </div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-4">Target Information</h3>
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+            <Briefcase className="w-6 h-6" />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-              <Mail className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 font-medium">Email</p>
-              <p className="font-semibold text-gray-900">{email || 'Not detected'}</p>
-            </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium lowercase tracking-wide">Target Role</p>
+            <p className="text-xl font-bold text-gray-900 italic">{selectedRole}</p>
           </div>
         </div>
       </div>
@@ -121,13 +110,13 @@ export default function Results({ result, onReset }) {
             <Lightbulb className="w-5 h-5 text-amber-500" />
             Suggestions for Improvement
           </h3>
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {suggestions.map((suggestion, idx) => (
               <li key={idx} className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-bold">
+                <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-bold mt-0.5">
                   {idx + 1}
                 </span>
-                <p className="text-gray-700 pt-0.5">{suggestion}</p>
+                <p className="text-gray-700">{suggestion}</p>
               </li>
             ))}
           </ul>
